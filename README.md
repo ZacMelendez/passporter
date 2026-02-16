@@ -13,13 +13,13 @@ The app is designed to keep your data private:
 
 Get the app running in a few minutes:
 
-1. **Prerequisites**: Node.js v20+ and npm (or pnpm).
+1. **Prerequisites**: Node.js v20+ and pnpm (or pnpm).
 
 2. **Clone and install**:
 
     ```bash
     cd passporter
-    npm install
+    pnpm install
     ```
 
 3. **Environment**: Copy the example env and (optionally) edit it:
@@ -33,13 +33,13 @@ Get the app running in a few minutes:
 4. **Database**: Create and migrate the SQLite database:
 
     ```bash
-    npm run db:migrate
+    pnpm run db:migrate
     ```
 
 5. **Run the app** (API on port 4000, frontend on 5173):
 
     ```bash
-    npm run dev:all
+    pnpm run dev:all
     ```
 
 6. **Open**: Go to [http://localhost:5173](http://localhost:5173).
@@ -74,7 +74,7 @@ See [Quick Start](#quick-start) for the shortest path. Below is the same flow wi
 ### Prerequisites
 
 - Node.js (v20+)
-- npm or pnpm
+- pnpm or pnpm
 
 ### Setup steps
 
@@ -89,8 +89,8 @@ See [Quick Start](#quick-start) for the shortest path. Below is the same flow wi
 2. **Install dependencies and database**:
 
     ```bash
-    npm install
-    npm run db:migrate
+    pnpm install
+    pnpm run db:migrate
     ```
 
     This installs dependencies, generates the Prisma client, and runs migrations (creating the SQLite DB if it doesn’t exist).
@@ -99,14 +99,14 @@ See [Quick Start](#quick-start) for the shortest path. Below is the same flow wi
 
     ```bash
     # Option 1: Run both frontend and backend together
-    npm run dev:all
+    pnpm run dev:all
 
     # Option 2: Run them separately in different terminals
     # Terminal 1 – Backend API (port 4000)
-    npm run dev:server
+    pnpm run dev:server
 
     # Terminal 2 – Frontend (port 5173)
-    npm run dev
+    pnpm run dev
     ```
 
 4. **Open your browser**: Go to [http://localhost:5173](http://localhost:5173).
@@ -116,37 +116,37 @@ See [Quick Start](#quick-start) for the shortest path. Below is the same flow wi
 - **Prisma Studio** (browse/edit data):
 
     ```bash
-    npm run db:studio
+    pnpm run db:studio
     ```
 
     Opens a web UI at [http://localhost:5555](http://localhost:5555).
 
 - **Reset the database** (⚠️ deletes all data):
     ```bash
-    npm run db:reset
+    pnpm run db:reset
     ```
 
 ### Production builds
 
 ```bash
 # Build everything (backend + frontend)
-npm run build:all
+pnpm run build:all
 
 # Or build separately
-npm run build:server  # Generates Prisma client + compiles TypeScript to db/dist/
-npm run build         # Frontend (compiles to dist/)
+pnpm run build:server  # Generates Prisma client + compiles TypeScript to db/dist/
+pnpm run build         # Frontend (compiles to dist/)
 ```
 
 To run the production backend:
 
 ```bash
-npm run start:server
+pnpm run start:server
 ```
 
 **Note**: Ensure your production environment has:
 
 - A `.env` file with the correct `DATABASE_URL` (e.g. SQLite path or another provider)
-- Prisma client generated (`npm run db:generate`), which runs automatically on `npm install`
+- Prisma client generated (`pnpm run db:generate`), which runs automatically on `pnpm install`
 
 ## Project Structure
 
