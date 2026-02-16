@@ -1,0 +1,5 @@
+/* App-level tweaks live here; most styling is handled by MUI's theme. */
+
+table {
+  border-collapse: collapse;
+}

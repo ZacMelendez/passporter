@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Entry {
+  id            Int       @id @default(autoincrement())
+  siteName      String?   @map("site_name")
+  url           String
+  username      String?
+  sourceEmail   String?   @map("source_email")
+  scrapedEmails String?   @map("scraped_emails") // JSON array stored as text
+  privacyUrl    String?   @map("privacy_url")
+  status        String    @default("pending")
+  errorMessage  String?   @map("error_message")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@unique([url, username])
+  @@map("entries")
+}
