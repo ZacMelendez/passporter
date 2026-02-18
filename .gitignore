@@ -37,3 +37,5 @@ prisma/migrations/
 *.njsproj
 *.sln
 *.sw?
+
+out

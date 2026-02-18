@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
     fetchEntries,
     importEntries,
@@ -79,9 +79,12 @@ export function useDeleteEntriesMutation() {
     });
 }
 
-export function useScrapeBatch() {
+export function useScrapeBatch(options?: { onBatchComplete?: () => void }) {
     const queryClient = useQueryClient();
     const { enqueueSnackbar } = useSnackbar();
+    const onBatchCompleteRef = useRef(options?.onBatchComplete);
+    onBatchCompleteRef.current = options?.onBatchComplete;
+
     const [isScrapingBatch, setIsScrapingBatch] = useState(false);
     const [scrapeProgress, setScrapeProgress] = useState<ScrapeProgress | null>(
         null,
@@ -110,6 +113,7 @@ export function useScrapeBatch() {
                 if (progress.pending === 0 && progress.inProgress === 0) {
                     setIsScrapingBatch(false);
                     queryClient.invalidateQueries({ queryKey: ENTRIES_QUERY_KEY });
+                    onBatchCompleteRef.current?.();
                 } else {
                     queryClient.invalidateQueries({ queryKey: ENTRIES_QUERY_KEY });
                 }

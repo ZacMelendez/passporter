@@ -241,6 +241,7 @@ export type EntriesDataGridProps = {
 
 export type EntriesDataGridHandle = {
     getFilteredEntries: () => Entry[];
+    getSelectedEntries: () => Entry[];
 };
 
 declare module "@tanstack/react-table" {
@@ -917,6 +918,8 @@ export const EntriesDataGrid = forwardRef<
     useImperativeHandle(ref, () => ({
         getFilteredEntries: () =>
             table.getFilteredRowModel().rows.map((r) => r.original),
+        getSelectedEntries: () =>
+            table.getSelectedRowModel().rows.map((r) => r.original),
     }));
 
     return (

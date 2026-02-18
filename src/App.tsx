@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { EntriesDataGridHandle } from "./components/EntriesDataGrid";
 import Papa from "papaparse";
 import "./App.css";
@@ -23,6 +23,8 @@ import { ScrapeProgressBanner } from "./components/ScrapeProgressBanner";
 import { EntriesTableToolbar } from "./components/EntriesTableToolbar";
 import { EntriesEmptyState } from "./components/EntriesEmptyState";
 import { EntriesDataGrid } from "./components/EntriesDataGrid";
+import { ComposeMassEmailDialog } from "./components/ComposeMassEmailDialog";
+import { ReviewMultipleEmailsDialog } from "./components/ReviewMultipleEmailsDialog";
 import { entriesToExportCsv } from "./utils/exportCsv";
 
 function App() {
@@ -31,13 +33,30 @@ function App() {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const gridRef = useRef<EntriesDataGridHandle | null>(null);
     const [hideNoEmails, setHideNoEmails] = useState(false);
+    const [composeDialogOpen, setComposeDialogOpen] = useState(false);
+    const [composeDialogEntries, setComposeDialogEntries] = useState<Entry[]>([]);
+    const [reviewMultipleOpen, setReviewMultipleOpen] = useState(false);
+    const [reviewMultipleEntries, setReviewMultipleEntries] = useState<Entry[]>([]);
 
     const entriesQuery = useEntriesQuery();
     const importMutation = useImportMutation();
     const scrapeOneMutation = useScrapeOneMutation();
     const deleteEntriesMutation = useDeleteEntriesMutation();
+    const handleBatchComplete = useCallback(() => {
+        queryClient.refetchQueries({ queryKey: ["entries"] }).then(() => {
+            const entries =
+                (queryClient.getQueryData<Entry[]>(["entries"]) ?? []);
+            const multi = entries.filter(
+                (e) => (e.scrapedEmails?.length ?? 0) > 1,
+            );
+            if (multi.length > 0) {
+                setReviewMultipleEntries(multi);
+                setReviewMultipleOpen(true);
+            }
+        });
+    }, [queryClient]);
     const { scrapeBatchMutation, isScrapingBatch, scrapeProgress } =
-        useScrapeBatch();
+        useScrapeBatch({ onBatchComplete: handleBatchComplete });
 
     const stats = useEntriesStats(entriesQuery.data);
     const filteredEntries = useFilteredEntries(entriesQuery.data, hideNoEmails);
@@ -81,6 +100,25 @@ function App() {
         a.download = "privacy-emails.csv";
         a.click();
         URL.revokeObjectURL(url);
+    };
+
+    const handleReviewMultipleEmails = () => {
+        const entries = entriesQuery.data ?? [];
+        const multi = entries.filter(
+            (e) => (e.scrapedEmails?.length ?? 0) > 1,
+        );
+        setReviewMultipleEntries(multi);
+        setReviewMultipleOpen(true);
+    };
+
+    const handleComposeMassEmail = () => {
+        const selected = gridRef.current?.getSelectedEntries() ?? [];
+        const entries =
+            selected.length > 0
+                ? selected
+                : (gridRef.current?.getFilteredEntries() ?? filteredEntries);
+        setComposeDialogEntries(entries);
+        setComposeDialogOpen(true);
     };
 
     const handleProcessRowUpdate = async (newRow: Entry) => {
@@ -141,7 +179,6 @@ function App() {
                         minHeight: 0,
                         display: "flex",
                         flexDirection: "column",
-                        mb: 3,
                     }}
                 >
                     <Box sx={{ flexShrink: 0, px: 2, pb: 2 }}>
@@ -151,6 +188,8 @@ function App() {
                             onHideNoEmailsChange={setHideNoEmails}
                             onScrapeAll={() => scrapeBatchMutation.mutate()}
                             onExport={handleExport}
+                            onComposeMassEmail={handleComposeMassEmail}
+                            onReviewMultipleEmails={handleReviewMultipleEmails}
                             hasPending={hasPending}
                             isScraping={
                                 scrapeBatchMutation.isPending || isScrapingBatch
@@ -193,6 +232,19 @@ function App() {
                     )}
                 </Box>
             </Box>
+            <ComposeMassEmailDialog
+                open={composeDialogOpen}
+                onClose={() => setComposeDialogOpen(false)}
+                entries={composeDialogEntries}
+            />
+            <ReviewMultipleEmailsDialog
+                open={reviewMultipleOpen}
+                onClose={() => setReviewMultipleOpen(false)}
+                entries={reviewMultipleEntries}
+                onSaved={() =>
+                    queryClient.invalidateQueries({ queryKey: ["entries"] })
+                }
+            />
         </Box>
     );
 }
